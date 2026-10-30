@@ -1,6 +1,14 @@
 -- Лаба 2. Запросы к своим данным
 -- Запуск: dbcheck run demo/lab2.sql --sql, или в psql: \i /demo/lab2.sql
 
+-- Проверка:
+-- docker compose down -v Пересоздание базы
+-- docker compose up -d    
+-- python -m dbcheck --lab 2 --stars
+-- python -m dbcheck run demo/lab2.sql --sql Прогон сценария с запросами 
+-- docker compose exec db psql -U postgres -d app Запуск консоли
+-- \q
+
 -- 1. Как называется вид каждого животного и чем он питается?
 -- expect: rows 19
 SELECT a.name AS animal, s.name AS species, s.diet
