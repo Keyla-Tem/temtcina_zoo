@@ -10,7 +10,8 @@ INSERT INTO species (name, diet) VALUES
     ('Амурский горал',          'herbivore'),  -- 8
     ('Кабан',                   'omnivore'),   -- 9
     ('Рысь',                    'predator'),   -- 10
-    ('Енотовидная собака',      'omnivore');   -- 11
+    ('Енотовидная собака',      'omnivore'),   -- 11
+    ('Лиса',                    'predator');   -- 12 (пока без представителей)
 
 -- Вольеры
 INSERT INTO enclosures (name, capacity) VALUES
@@ -36,7 +37,8 @@ INSERT INTO keepers (last_name, first_name, patronymic, age, phone) VALUES
     ('Гончаров',   'Игорь',   'Павлович',      27, '+79141230007'),  -- 7
     ('Волкова', 'Ольга',   'Дмитриевна',    36, '+79141230008'),  -- 8
     ('Пушкин',  'Сергей',  'Александрович', 25, '+79141230009'),  -- 9
-    ('Ким',  'Татьяна', NULL,            23, '+79141230010');  -- 10
+    ('Ким',  'Татьяна', NULL,            23, '+79141230010'),  -- 10
+    ('Акутагава',  'Рю', NULL,            23, '+71148567844');  -- 11 (пока без вольера)
 
 -- Животные (хищники живут отдельно от травоядных)
 INSERT INTO animals (name, species_id, enclosure_id, birth_date, weight_kg) VALUES
