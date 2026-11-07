@@ -70,6 +70,7 @@ erDiagram
         integer enclosure_id FK
         date birth_date
         numeric weight_kg
+        timestamptz updated_at
     }
     keeper_enclosures {
         integer keeper_id PK, FK
@@ -103,8 +104,8 @@ erDiagram
 | Лаба | Что сделано | Сценарий |
 | --- | --- | --- |
 | 1 | ER-диаграмма (6 таблиц, связь N:M смотрители и вольеры), схема с ключами и ограничениями, тестовые данные, три отклонённые базой вставки | `demo/lab1.sql` |
-| 2 | ... | `demo/lab2.sql` |
-| 3 | ... | `demo/lab3.sql` |
+| 2 | 12 запросов: `JOIN`, группировка с `HAVING`, «сироты», подзапросы, `INSERT`/`UPDATE`/`DELETE` в транзакции с откатом; ★: `WITH`, оконные функции, динамика по месяцам, рекурсивный CTE | `demo/lab2.sql` |
+| 3 | Представления `v_animal_card` и `v_enclosure_occupancy`, функции `free_places` и `feed_animal`, триггер правила «хищника нельзя к травоядным», служебный триггер `updated_at` | `demo/lab3.sql` |
 | 4 | ... | `demo/lab4.sql`, `demo/race.sql`, `demo/race_fixed.sql` |
 | 5 | ... | `demo/lab5.sql` |
 

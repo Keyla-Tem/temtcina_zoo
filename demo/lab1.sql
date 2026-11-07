@@ -3,7 +3,7 @@
 
 -- 1. Таблицы на месте: 6 таблиц
 -- expect: rows 6
-SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY 1;
+SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY 1;
 
 -- 2. Отрицательное количество корма: ошибка CHECK
 -- expect: error check
