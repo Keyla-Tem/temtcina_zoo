@@ -38,3 +38,25 @@ BEGIN
 
     RETURN v_id;
 END $$;
+
+
+-- Поиск животных с необязательными фильтрами, как форма на сайте.
+-- Любой фильтр можно не передавать (тогда он NULL и условие пропускается).
+CREATE FUNCTION find_animals(
+    p_species    text    DEFAULT NULL,
+    p_enclosure  integer DEFAULT NULL,
+    p_min_weight numeric DEFAULT NULL
+)
+RETURNS TABLE (animal text, species text, enclosure text, weight_kg numeric)
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT a.name, s.name, e.name, a.weight_kg
+    FROM animals a
+    JOIN species s    ON s.id = a.species_id
+    JOIN enclosures e ON e.id = a.enclosure_id
+    WHERE (p_species    IS NULL OR s.name = p_species)
+      AND (p_enclosure  IS NULL OR a.enclosure_id = p_enclosure)
+      AND (p_min_weight IS NULL OR a.weight_kg >= p_min_weight)
+    ORDER BY a.name;
+$$;
