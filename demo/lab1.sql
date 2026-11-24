@@ -1,9 +1,9 @@
 -- Лаба 1. Сценарий для показа. Формат описан в docs/scenarios.md.
 -- Запуск: dbcheck run demo/lab1.sql, или в psql: \i /demo/lab1.sql
 
--- 1. Таблицы на месте: 6 таблиц
--- expect: rows 6
-SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY 1;
+-- 1. Таблицы на месте: 6 основных и журнал feedings_log
+-- expect: rows 7
+SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY 1;
 
 -- 2. Отрицательное количество корма: ошибка CHECK
 -- expect: error check
