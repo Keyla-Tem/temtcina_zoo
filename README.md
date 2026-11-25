@@ -106,7 +106,7 @@ erDiagram
 | 1 | ER-диаграмма (6 таблиц, связь N:M смотрители и вольеры), схема с ключами и ограничениями, тестовые данные, три отклонённые базой вставки | `demo/lab1.sql` |
 | 2 | 12 запросов: `JOIN`, группировка с `HAVING`, «сироты», подзапросы, `INSERT`/`UPDATE`/`DELETE` в транзакции с откатом; ★: `WITH`, оконные функции, динамика по месяцам, рекурсивный CTE | `demo/lab2.sql` |
 | 3 | Представления `v_animal_card` и `v_enclosure_occupancy`, функции `free_places` и `feed_animal`, триггер правила «хищника нельзя к травоядным», служебный триггер `updated_at`; ★: материализованное представление `mv_species_feeding_report`, функция поиска `find_animals`; ★★: журнал `feedings_log` с триггером и функция `feeding_at` | `demo/lab3.sql` |
-| 4 | ... | `demo/lab4.sql`, `demo/race.sql`, `demo/race_fixed.sql` |
+| 4 | Откат транзакции, гонка и её исправление блокировкой вольера (`settle_animal`), роли `app_reader`/`app_writer`; ★: уровни изоляции и взаимоблокировка; ★★: Row Level Security и резервная копия | `demo/lab4.sql`, `demo/race.sql`, `demo/race_fixed.sql` |
 | 5 | ... | `demo/lab5.sql` |
 
 ## Нормализация
@@ -139,3 +139,34 @@ erDiagram
 | `keeper_enclosures.enclosure_id` → `enclosures` | `CASCADE` | при удалении вольера назначения смотрителей исчезают вместе с ним |
 | `feedings.animal_id` → `animals` | `CASCADE` | записи о кормлении не нужны без животного |
 | `feedings.keeper_id` → `keepers` | `RESTRICT` | нельзя удалить смотрителя, пока остались записи о его кормлениях |
+
+## Гонка
+
+**Что происходит.** Правило «хищника нельзя поселить к травоядным» проверяет триггер: он смотрит, кто уже живёт в вольере. Если двоих заселяют одновременно, каждый триггер не видит незафиксированную вставку другого.
+
+**Шаги** (`demo/race.sql`):
+1. В пустой вольер `race-test` окно A вставляет тигра, окно B вставляет оленя. Транзакции открыты, ни одна не зафиксирована.
+2. Триггер окна A не видит оленя, триггер окна B не видит тигра, оба пропускают вставку.
+3. Оба окна фиксируют транзакции: в одном вольере хищник и травоядное, правило нарушено (`[check]` возвращает `false`).
+
+**Исправление.** Операция `settle_animal` (`db/20_race_fix.sql`) сначала блокирует строку вольера (`SELECT ... FOR UPDATE`), и только потом вставляет животное. Второе окно ждёт, пока первое зафиксируется, а затем его триггер уже видит первого жителя и отклоняет вставку (`demo/race_fixed.sql`, `[check]` возвращает `true`).
+
+## Роли
+
+| Роль | Что может |
+| --- | --- |
+| `app_reader` | читает только представления `v_animal_card`, `v_enclosure_occupancy`, `mv_species_feeding_report` |
+| `app_writer` | то же, плюс вызывает `feed_animal` и `settle_animal`; таблицы напрямую менять не может |
+| `app_keeper` | видит только свои кормления (Row Level Security) |
+
+Пароли ролей лежат в `.env` (в репозиторий не попадает), образец в `.env.example`.
+
+## Резервная копия
+
+\`\`\`bash
+docker compose exec db pg_dump -U postgres -Fc -f /tmp/app.dump app
+docker compose exec db createdb -U postgres app_restore
+docker compose exec db pg_restore -U postgres -d app_restore /tmp/app.dump
+docker compose exec db psql -U postgres -d app_restore -c "SELECT count(*) FROM feedings;"   # 1539, как в основной базе
+docker compose exec db dropdb -U postgres app_restore
+\`\`\`
